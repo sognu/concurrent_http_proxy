@@ -7,8 +7,8 @@ from pyDes import *
   
 def get_random():
     '''
-    Generates an 8-byte sequence of random values. This is used for the Initialization Vector for 3DES.
-    All ascii letters and digits are considered valid.
+    Generates an 8-byte sequence for the Initialization Vector for 3DES.
+    Ascii letters and digits are valid.
     @return: 8-byte sequence of random ascii characters.
     '''
     size = 8 
