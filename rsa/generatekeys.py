@@ -1,11 +1,12 @@
 import rsa
 import os
 
+#Generates pub/priv keypair of n bytes
 def generate_keypair(n):
     (publickey, privatekey) = rsa.newkeys(n)
     return {"pub": publickey, "priv": privatekey}
     
-# Write the keys to a file on disk.
+# Write the key pair to disk
 def write_keys(keys, name):
     
     if not os.path.exists('./keys'):
