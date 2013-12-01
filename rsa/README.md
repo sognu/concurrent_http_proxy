@@ -3,11 +3,11 @@ Implements a secure messaging app using rsa encryption.
 Install
 --------------
 to satisfies the dependencies just run
-'''python
+```python
 pip install rsa
-'''
+```
 and
-'''python
+```python
 pip install pyDes
-'''
+```
 
