@@ -2,7 +2,6 @@
 import sys
 import socket
 import getopt
-
 import Checksum
 import BasicSender
 import Ptr
@@ -24,26 +23,31 @@ class ReliableSender(BasicSender.BasicSender):
         msg_type = Ptr.Ptr(None) # Custom pointer
         not_ack = {} # Packets that haven't been acknowledged
         msg = self.infile.read(500)
+        done = False
         while 1:
             next_msg = self.infile.read(500)
 
             self.init(msg_type, seqno, next_msg)
-            self.check_list(not_ack) # Look for unacknowledged messages
-            packet = self.make_packet(msg_type.get(),seqno,msg)
-            self.send(packet)
-            not_ack[seqno] = packet
-            print "sent: %s" % packet
-            response = self.receive() #start timer
-            if response is not None:
-                self.handle_response(response)
-                del not_ack[seqno]
+            self.check_list(Ptr.Ptr(not_ack)) # Look for unacknowledged messages and re-send
+            if not done:
+                packet = self.make_packet(msg_type.get(),seqno,msg)
+                self.send(packet)
+                not_ack[seqno] = packet
+                print "sent: %s" % packet
+                response = self.receive(.02) #start timer
+                if response is not None:
+                    self.handle_response(response)
+                    del not_ack[seqno]
+            
+                if msg_type.get() == 'end':
+                    done = True
 
-            seqno += 1
+                    seqno += 1
         
-            if not_ack: #Continue until all messages acknowledged
-                continue
-            else:
-                break
+                if not_ack: #Continue until all messages acknowledged
+                    continue
+                else:
+                    break
 
             
 
@@ -51,13 +55,16 @@ class ReliableSender(BasicSender.BasicSender):
     # Verifies all msgs received, if not resends.
     def check_list(self, not_ack):
         packet = 0
-        if not_ack:
-            for seqno in not_ack:
-                packet = not_ack[seqno]
+        dic = not_ack.get() #dic of seqno --> packet
+        if dic:
+            for seqno in dic.keys():
+                packet = dic[seqno]
                 self.send(packet)
+                response = self.receive(.02)
                 if response is not None:
                     self.handle_response(response)
-                    del not_ack[seqno]
+                    del dic[seqno]
+                    not_ack.set(dic)
 
 
     def init(self, msg_type, seqno, next_msg):
@@ -66,8 +73,8 @@ class ReliableSender(BasicSender.BasicSender):
             msg_type.set('start')
         elif next_msg == "":
             msg_type.set('end')
-        
-   
+           
+            
    
 '''
 This will be run if you run this script from the command line. You should not
