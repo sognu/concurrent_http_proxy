@@ -41,7 +41,7 @@ class ReliableSender(BasicSender.BasicSender):
                     del not_ack[seqno]
 
                 else:
-                    self.resend(Ptr.Ptr(not_ack)) # Look for unacknowledged messages and re-send
+                    self.resend(Ptr.Ptr(not_ack)): # Look for unacknowledged messages and re-send
                      
                 if msg_type.get() == 'end':
                     done = True
