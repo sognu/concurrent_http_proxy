@@ -56,7 +56,6 @@ class ReliableSender(BasicSender.BasicSender):
 
     # Verifies all msgs received, if not resends.
     def resend(self, not_ack):
-        #pdb.set_trace()
         packet = 0
         dic = not_ack.get() #dic of seqno --> packet
         while 1:
