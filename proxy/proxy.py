@@ -1,7 +1,7 @@
 import socket, sys, re, os, SocketServer, threading, logging, logging.config, datetime
 import email.utils as eut
 from urlparse import urlparse
-
+import pdb
 # List of all accepted URI headers. Connection is omitted because it is always replaced with 'close' anyway.
 header_fields = ['Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language', 'Accept-Datetime',
 'Authorization', 'Cache-Control', 'Cookie', 'Content-Length', 'Content-MD5', 'Content-Type',
@@ -18,7 +18,7 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
     @see: get_uri(cli_request) for more information on URI formatting.
      """
     def handle(self):
-
+        pdb.set_trace()
         msg = self.request.recv(1024)
         rqst = self.parse_rqst(msg)
         if 'error' not in rqst:
@@ -53,11 +53,11 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
                     # Write the socket buffer to a temporary file, and then read those lines into a buffer.
                     try:
                         fileobj = outbound.makefile('r', 0)
-                        print s
+#                        print s
                         fileobj.write(s)
                        
                         buffer = fileobj.readlines()
-                        print buffer
+ #                       print buffer
                         # Cache the result.                        
                         tmpFile = open("cache/" + rqst['host'] + rqst['url'].replace("/", "-"), 'wb')
                         
@@ -196,8 +196,8 @@ if __name__ == '__main__':
 
     # Clear cache prior to run (for testing/grading purposes.)
     filelist = [ f for f in os.listdir("./cache")]
-    for f in filelist:
-        os.remove("./cache/" + f)
+    # for f in filelist:
+    #     os.remove("./cache/" + f)
     
     host = ''
     port = int(sys.argv[1])
