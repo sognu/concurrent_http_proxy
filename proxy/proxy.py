@@ -12,12 +12,13 @@ header_fields = ['Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language
 class TCPRequestHandler(SocketServer.BaseRequestHandler):
     
 
+    """
+    Entry point for multi-processing. Uses the inherited class functions to obtain the client socket.
+    Requests from client must come in the form of a valid URI.
+    @see: get_uri(cli_request) for more information on URI formatting.
+     """
     def handle(self):
-        """
-        Entry point for multi-processing. Uses the inherited class functions to obtain the client socket.
-        Requests from client must come in the form of a valid URI.
-        @see: get_uri(cli_request) for more information on URI formatting.
-        """
+
         msg = self.request.recv(1024)
         rqst = self.parse_rqst(msg)
         if 'error' not in rqst:
@@ -79,14 +80,16 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
             logging.error("Client %s error: %s" % (str(self.client_address), rqst['error']))
             self.request.send(self.get_err(rqst['error']))
             self.request.close()
-    
+
+
+    """
+    Takes a properly formatted HTTP request and returns the formatted URI request.
+    Refer to RFC 1945 section 5.4.2 for details on how URI requests are formatted.
+    @param request: Hash of a valid HTTP GET request.
+    @return: A (hopefully) valid URI
+    """
     def get_uri(self, request):
-        """
-        Takes a properly formatted HTTP request and returns the formatted URI request.
-        Refer to RFC 1945 section 5.4.2 for details on how URI requests are formatted.
-        @param request: Hash of a valid HTTP GET request.
-        @return: A (hopefully) valid URI
-        """  
+
         hdrs = [(_h.split(':')[0].strip(), _h.split(':')[1].strip()) for _h in request['headers'].splitlines() if _h.split(':')[0] in header_fields]
         hdrs.append(('Connection', 'close'))
         
@@ -100,14 +103,16 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
         else:
             uri = "GET / {1}\r\n{2}".format(request['host'], request['version'], rslt)
         return uri
-             
+    
+        
+    """
+    Given a message received from a connected client, determine if it is a valid HTTP request.
+    @param message: Client HTTP request. 
+    @return: Hash of valid URI fields.
+    @return: None upon encountering an error.
+    """
     def parse_rqst(self, message):
-        """
-        Given a message received from a connected client, determine if it is a valid HTTP request.
-        @param message: Client HTTP request. 
-        @return: Hash of valid URI fields.
-        @return: None upon encountering an error.
-        """
+
         # Breakdown of regex:        GET      AbsoluteURL (per rfc)        HTTP version            Everything else.
         regex = re.compile(r"""(?P<method>\w+) (?P<url>.*) (?P<version>HTTP/\d\.\d)\r*\n*(?P<headers>.*)\r*\n""", re.DOTALL)
         match = regex.match(message)
@@ -123,21 +128,23 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
                 return {'error': "Error 501: Not Implemented"}
         else:
             return {'error': "Error 400: Bad Request"}
-       
+
+        
+    """
+    Builds a very basic webpage string in the event of an error in between the client and proxy server. 
+    @param errmsg: String containing an HTTP error message.
+    @return: Webpage readable string. 
+    """         
     def get_err(self, errmsg):
-        """
-        Builds a very basic webpage string in the event of an error in between the client and proxy server. 
-        @param errmsg: String containing an HTTP error message.
-        @return: Webpage readable string. 
-        """
-        return """<html><head></head><body><font size="20"><b>{0}</b></font></body></html>""".format(errmsg)
-    
+       return """<html><head></head><body><font size="20"><b>{0}</b></font></body></html>""".format(errmsg)
+
+
+    """
+    Determines if the current file is still within the appropriate age to be considered valid.
+    @param data: data buffer from a cached file 
+    @return: True if cache file is still valid, false otherwise.
+    """   
     def valid_cache(self, data):
-        """
-        Determines if the current file is still within the appropriate age to be considered valid.
-        @param data: data buffer from a cached file 
-        @return: True if cache file is still valid, false otherwise.
-        """
         # List of good words and bad words. Bad words imply that the file must always be refreshed.
         bad = ['no-cache', 'no-store', 'must-revalidate', 'proxy-revalidate']
         good = ['max-age', 's-maxage']
@@ -165,15 +172,15 @@ class TCPRequestHandler(SocketServer.BaseRequestHandler):
         current_date = datetime.datetime.now()
         age = (current_date - cached_date[0]).total_seconds()
 
-        if max_age < age:
-            return False
+        if age <= max_age:
+            return True  # Valid cache
         else:
-            return True
-     
+            return False
+
+"""
+Overloaded constructor for a threadedTCPServer object. Template acquired via python.org's docs.
+"""
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    """
-    Overloaded constructor for a threadedTCPServer object. Template acquired via python.org's docs.
-    """
     pass
 
 if __name__ == '__main__':
