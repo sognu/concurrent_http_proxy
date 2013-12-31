@@ -1,9 +1,3 @@
-
-To Run
---------------
-python proxy.py <port> 
-
-
 ****************
 Implements a HTTP proxy 
 ****************
