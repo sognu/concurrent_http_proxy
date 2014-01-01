@@ -8,6 +8,7 @@ README		- This file
 reparse {.py}	- Primary source code
 
 Purpose:
-To show an example of a tiny compiler. The compiler builds deterministic finite automata (dfa's) as well as non-deterministic finite automata (nfa's).
+To show an example of a tiny compiler. The compiler builds deterministic finite automata (dfa's) as well as non-deterministic finite automata (nfa's) using a formal grammar with production rules.
+
 To run:
 There are too many dependencies to include them all :)
