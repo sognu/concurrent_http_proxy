@@ -1,0 +1,20 @@
+******************************************************
+Thread-safe Concurrent HTTP Proxy that logs requests
+******************************************************
+
+
+Makefile	- For building and cleaning proxy
+README		- This file
+
+# Proxy source files
+proxy.{c,h}	- Primary proxy code
+csapp.{c,h}	- Wrapper and helper functions from the CS:APP text
+cache.{c,h}     - Implements a proxy cache
+
+To run:
+./proxy <port>
+
+run clients on telnet:
+telnet localhost <port>
+
+or configure browser to run through a proxy on localhost that way all your browser requests go through your proxy.
